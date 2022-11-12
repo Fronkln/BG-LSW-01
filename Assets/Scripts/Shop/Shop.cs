@@ -22,7 +22,12 @@ public class Shop : InteractableEntity
 
     public override void OnPlayerInteract()
     {
-        OpenShop();
+        //Start a speech, then present a choice prompt after the speech finishes through a callback.
+        UIManager.DoSpeech("Hey! How can i help you today?", "Salesman", 
+            delegate 
+            {
+                UIManager.DoSpeechChoice("I am here to...", new string[] { "Buy", "Sell" }, delegate { print("you got duped"); });
+            });
     }
 
     public void CloseShop()

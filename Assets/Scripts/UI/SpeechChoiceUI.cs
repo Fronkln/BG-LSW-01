@@ -8,9 +8,11 @@ using Unity.VisualScripting;
 
 public class SpeechChoiceUI : MonoBehaviour
 {
-    [HideInInspector] public TextMeshProUGUI OptionTemplate;
-    [HideInInspector] public RectTransform SelectedOptionIcon;
-    [HideInInspector] public RectTransform ChoiceGrid;
+    //TODO: Naming convention
+    private TextMeshProUGUI OptionTemplate;
+    private TextMeshProUGUI Speech;
+    private RectTransform SelectedOptionIcon;
+    private RectTransform ChoiceGrid;
 
     private int m_selectedOption = 0;
     private List<RectTransform> m_createdOptions = new List<RectTransform>();
@@ -24,6 +26,7 @@ public class SpeechChoiceUI : MonoBehaviour
     {
         ChoiceGrid = (RectTransform)transform.Find("SpeechInside/ChoiceGrid");
         SelectedOptionIcon = (RectTransform)transform.Find("SpeechInside/Choice");
+        Speech = transform.Find("SpeechInside/Speech").GetComponent<TextMeshProUGUI>();
         OptionTemplate = ChoiceGrid.Find("OptionTemplate").GetComponent<TextMeshProUGUI>();
 
         OptionTemplate.gameObject.SetActive(false);
@@ -33,6 +36,8 @@ public class SpeechChoiceUI : MonoBehaviour
     {
         if (!m_active || m_choiceMade)
             return;
+
+        RootScript.PlayerBusy = true;
 
         int selectedOption = m_selectedOption;
 
@@ -53,7 +58,7 @@ public class SpeechChoiceUI : MonoBehaviour
             OnOptionChanged();
         }
 
-        if(Input.GetKeyDown(KeyCode.Return))
+        if (Input.GetKeyDown(KeyCode.Return))
         {
             OnOptionChosen();
         }
@@ -74,10 +79,14 @@ public class SpeechChoiceUI : MonoBehaviour
     /// <summary>
     /// Generate UI and activate a choice prompt.
     /// </summary>
-    public void Initialize(string[] options, Action<int> onOptionChosen)
+    public void Initialize(string speech, string[] options, Action<int> onOptionChosen)
     {
-        RootScript.PlayerBusy = true;
+        Clear();
+
         m_active = true;
+        m_chosenOptionCallback = onOptionChosen;
+
+        Speech.text = speech;
 
         for (int i = 0; i < options.Length; i++)
         {

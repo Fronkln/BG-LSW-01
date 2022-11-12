@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -43,5 +44,40 @@ public class UIManager : MonoBehaviour
     public static void InitializeShop(Shop shop)
     {
         Instance.m_shopUI.ProcessShopUI(shop);
+    }
+
+    /// <summary>
+    /// Do speech, just one line.
+    /// </summary>
+    public static void DoSpeech(string speech, string speaker, Action finishedCallback = null)
+    {
+        DoSpeech(new string[] { speech }, speaker, finishedCallback);
+    }
+
+    /// <summary>
+    /// Do speech, one speaker only.
+    /// </summary>
+    public static void DoSpeech(string[] speech, string speaker, Action finishedCallback = null)
+    {
+        string[] speakerArr = new string[speech.Length];
+        Array.Fill(speakerArr, speaker);
+
+        DoSpeech(speech, speakerArr, finishedCallback);
+    }
+
+    /// <summary>
+    /// Do speech, with multiple speakers, speaker array must be same length as speech.
+    /// </summary>
+    public static void DoSpeech(string[] speech, string[] speaker, Action finishedCallback = null)
+    {
+        Instance.m_speechUI.Initialize(speech, speaker, finishedCallback);
+    }
+
+    /// <summary>
+    /// Present a choice to the player.
+    /// </summary>
+    public static void DoSpeechChoice(string speech, string[] choices, Action<int> m_finishedCallback)
+    {
+        Instance.m_speechChoiceUI.Initialize(speech, choices, m_finishedCallback);
     }
 }
