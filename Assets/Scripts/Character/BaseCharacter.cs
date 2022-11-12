@@ -53,7 +53,7 @@ public class BaseCharacter : MonoBehaviour
 
     }
 
-    public virtual void Update()
+    protected virtual void Update()
     {
         Direction = GetDirection();
         AnimationUpdate();

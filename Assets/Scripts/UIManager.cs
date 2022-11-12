@@ -15,6 +15,7 @@ public class UIManager : MonoBehaviour
     //Various UIs contained in UIRoot
     private ShopUI m_shopUI = null;
     private SpeechUI m_speechUI = null;
+    private SpeechChoiceUI m_speechChoiceUI = null;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void Initialize()
@@ -30,9 +31,13 @@ public class UIManager : MonoBehaviour
         m_uiRoot = Instantiate(Resources.Load<RectTransform>("GameUI"));
         m_shopUI = m_uiRoot.Find("ShopUI").GetComponent<ShopUI>();
         m_speechUI = m_uiRoot.Find("SpeechUI").GetComponent<SpeechUI>();
+        m_speechChoiceUI = m_uiRoot.Find("SpeechChoiceUI").GetComponent<SpeechChoiceUI>();
 
         m_shopUI.gameObject.SetActive(false);
         m_speechUI.gameObject.SetActive(false);
+        m_speechChoiceUI.gameObject.SetActive(false);
+
+       // m_speechChoiceUI.Initialize(new string[] { "Buy", "Sell" }, null);
     }
 
     public static void InitializeShop(Shop shop)

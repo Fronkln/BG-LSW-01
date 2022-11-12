@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class Shop : MonoBehaviour
+public class Shop : InteractableEntity
 {
     [Header("Character to link this shop to, not required.")]
     public BaseCharacter LinkedCharacter = null;
@@ -18,8 +18,11 @@ public class Shop : MonoBehaviour
 
     public void Update()
     {
-        if (Input.GetKeyDown(KeyCode.E))
-            OpenShop();
+    }
+
+    public override void OnPlayerInteract()
+    {
+        OpenShop();
     }
 
     public void CloseShop()
@@ -53,6 +56,9 @@ public class Shop : MonoBehaviour
             return null;
 
         CharacterPlayer.Instance.Inventory.Gold -= totalGold;
+
+        if (LinkedCharacter != null)
+            LinkedCharacter.Inventory.Gold += totalGold;
 
         //Duplicate the cart, this is theo ne that will get sent
         Dictionary<ShopStock, int> cartDupl = new Dictionary<ShopStock, int>(m_shoppingCart);
