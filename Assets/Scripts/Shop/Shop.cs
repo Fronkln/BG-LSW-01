@@ -11,4 +11,21 @@ public class Shop : MonoBehaviour
     public bool AllowSelling = true;
 
     public ShopStock[] Stocks = new ShopStock[0];
+
+    public void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.E))
+            OpenShop();
+    }
+
+    public void OpenShop()
+    {
+        if (RootScript.PlayerBusy)
+            return;
+
+        print("Shop open");
+
+        RootScript.PlayerBusy = true;
+        UIManager.InitializeShop(this);
+    }
 }

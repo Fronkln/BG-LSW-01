@@ -21,11 +21,20 @@ public class CharacterPlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (RootScript.PlayerBusy)
+            return;
+
         m_Player.Rigidbody.velocity = (m_moveDir * Speed) * Time.deltaTime;
     }
 
     public void InputUpdate()
     {
+        if (RootScript.PlayerBusy)
+        {
+            m_moveDir = Vector2.zero;
+            return;
+        }
+
         m_moveDir = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
     }
 
