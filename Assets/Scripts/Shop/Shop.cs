@@ -23,10 +23,21 @@ public class Shop : InteractableEntity
     public override void OnPlayerInteract()
     {
         //Start a speech, then present a choice prompt after the speech finishes through a callback.
+        //Yes, this is hardcoded, but i didn't see any need to make this part dynamic considering the
+        //scope of this interview's goals.
         UIManager.DoSpeech("Hey! How can i help you today?", "Salesman", 
             delegate 
             {
-                UIManager.DoSpeechChoice("I am here to...", new string[] { "Buy", "Sell" }, delegate { print("you got duped"); });
+                //Open shop in different modes based on the return value.
+                UIManager.DoSpeechChoice("I am here to...", new string[] { "Buy", "Sell", "Nevermind" }, 
+                    delegate(int choice)
+                    {
+                        if (choice < 2)
+                        {
+                            bool buy = choice == 0;
+                            OpenShop();
+                        }
+                    });
             });
     }
 
@@ -39,11 +50,6 @@ public class Shop : InteractableEntity
 
     public void OpenShop()
     {
-        if (RootScript.PlayerBusy)
-            return;
-
-        print("Shop open");
-
         RootScript.PlayerBusy = true;
         UIManager.InitializeShop(this);
     }

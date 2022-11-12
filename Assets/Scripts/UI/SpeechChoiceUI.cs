@@ -8,14 +8,24 @@ using Unity.VisualScripting;
 
 public class SpeechChoiceUI : MonoBehaviour
 {
-    //TODO: Naming convention
-    private TextMeshProUGUI OptionTemplate;
-    private TextMeshProUGUI Speech;
-    private RectTransform SelectedOptionIcon;
-    private RectTransform ChoiceGrid;
+    //UI Objects
+    private TextMeshProUGUI m_optionTemplate;
+    private TextMeshProUGUI m_speech;
+    private TextMeshProUGUI m_selectedOptionIcon;
+    private RectTransform m_choiceGrid;
 
+    private AudioSource m_soundEmitter;
+
+    //Sounds
+    [SerializeField] private AudioClip m_selectedAudioclip;
+    [SerializeField] private AudioClip m_confirmAudioclip;
+
+    //Colors
+    private readonly Color32 m_selectedColor = new Color32(204, 204, 0, 255);
+
+    //Misc variables
     private int m_selectedOption = 0;
-    private List<RectTransform> m_createdOptions = new List<RectTransform>();
+    private List<TextMeshProUGUI> m_createdOptions = new List<TextMeshProUGUI>();
 
     private Action<int> m_chosenOptionCallback = null;
 
@@ -24,12 +34,13 @@ public class SpeechChoiceUI : MonoBehaviour
 
     void Awake()
     {
-        ChoiceGrid = (RectTransform)transform.Find("SpeechInside/ChoiceGrid");
-        SelectedOptionIcon = (RectTransform)transform.Find("SpeechInside/Choice");
-        Speech = transform.Find("SpeechInside/Speech").GetComponent<TextMeshProUGUI>();
-        OptionTemplate = ChoiceGrid.Find("OptionTemplate").GetComponent<TextMeshProUGUI>();
+        m_choiceGrid = (RectTransform)transform.Find("SpeechInside/ChoiceGrid");
+        m_selectedOptionIcon = transform.Find("SpeechInside/Choice").GetComponent<TextMeshProUGUI>();
+        m_speech = transform.Find("SpeechInside/Speech").GetComponent<TextMeshProUGUI>();
+        m_optionTemplate = m_choiceGrid.Find("OptionTemplate").GetComponent<TextMeshProUGUI>();
+        m_soundEmitter = gameObject.GetComponent<AudioSource>();
 
-        OptionTemplate.gameObject.SetActive(false);
+        m_optionTemplate.gameObject.SetActive(false);
     }
 
     private void Update()
@@ -69,8 +80,9 @@ public class SpeechChoiceUI : MonoBehaviour
     {
         m_selectedOption = 0;
         m_chosenOptionCallback = null;
+        m_selectedOptionIcon.color = Color.white;
 
-        foreach (RectTransform transform in m_createdOptions)
+        foreach (TextMeshProUGUI transform in m_createdOptions)
             Destroy(transform.gameObject);
 
         m_createdOptions.Clear();
@@ -86,16 +98,16 @@ public class SpeechChoiceUI : MonoBehaviour
         m_active = true;
         m_chosenOptionCallback = onOptionChosen;
 
-        Speech.text = speech;
+        m_speech.text = speech;
 
         for (int i = 0; i < options.Length; i++)
         {
-            TextMeshProUGUI newChoice = Instantiate(OptionTemplate);
-            newChoice.transform.parent = ChoiceGrid;
+            TextMeshProUGUI newChoice = Instantiate(m_optionTemplate);
+            newChoice.transform.parent = m_choiceGrid;
             newChoice.text = options[i];
             newChoice.gameObject.SetActive(true);
 
-            m_createdOptions.Add(newChoice.rectTransform);
+            m_createdOptions.Add(newChoice);
         }
 
         gameObject.SetActive(true);
@@ -103,20 +115,31 @@ public class SpeechChoiceUI : MonoBehaviour
 
     private void OnOptionChanged()
     {
-        SelectedOptionIcon.transform.position = new Vector3
-            (SelectedOptionIcon.transform.position.x,
+        m_soundEmitter.PlayOneShot(m_selectedAudioclip);
+
+        m_selectedOptionIcon.transform.position = new Vector3
+            (m_selectedOptionIcon.transform.position.x,
             m_createdOptions[m_selectedOption].transform.position.y,
-            SelectedOptionIcon.transform.position.z);
+            m_selectedOptionIcon.transform.position.z);
     }
 
     private void OnOptionChosen()
     {
         m_choiceMade = true;
+        m_createdOptions[m_selectedOption].color = m_selectedColor;
+        m_selectedOptionIcon.color = m_selectedColor;
+        m_soundEmitter.PlayOneShot(m_confirmAudioclip);
         Invoke("Finish", 1);
     }
 
     private void Finish()
     {
+        //Reset position
+        m_selectedOptionIcon.transform.position = new Vector3
+            (m_selectedOptionIcon.transform.position.x,
+            m_createdOptions[0].transform.position.y,
+            m_selectedOptionIcon.transform.position.z);
+
         m_active = false;
         m_choiceMade = false;
         gameObject.SetActive(false);
