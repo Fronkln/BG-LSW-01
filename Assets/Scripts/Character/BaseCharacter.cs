@@ -16,6 +16,8 @@ public class BaseCharacter : MonoBehaviour
     [HideInInspector] public Animator Animator = null;
     [HideInInspector] public BoxCollider2D Collider = null;
 
+    public Inventory Inventory = new Inventory();
+
     public CharacterDirection Direction = CharacterDirection.Down;
 
     public virtual void Awake()

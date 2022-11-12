@@ -15,6 +15,15 @@ public class ShopUI : MonoBehaviour
     [HideInInspector] public RectTransform ItemsPanel;
     [HideInInspector] public RectTransform ItemTemplate;
 
+    [HideInInspector] public RectTransform GoldsRoot;
+    [HideInInspector] public TextMeshProUGUI PlayerGold;
+    [HideInInspector] public TextMeshProUGUI SellerGold;
+    [HideInInspector] public TextMeshProUGUI TotalGold;
+
+    //Sounds
+    [SerializeField] private AudioClip m_sfxShopCartAdd;
+    [SerializeField] private AudioClip m_sfxShopFail;
+
     //Colors
     private static readonly Color32 m_unselectedColor = new Color32(94, 94, 91, 255);
     private static readonly Color32 m_highlightedColor = new Color32(144, 130, 0, 255);
@@ -23,15 +32,24 @@ public class ShopUI : MonoBehaviour
     private List<ShopUIEntry> m_createdItems = new List<ShopUIEntry>();
     private int m_currentSelectedItem = 0;
 
+    private AudioSource m_soundPlayer = null;
+
     private void Awake()
     {
         DescriptionPanel = (RectTransform)transform.Find("DescriptionPanel");
         DescriptionText = DescriptionPanel.Find("DescriptionText").GetComponent<TextMeshProUGUI>();
-        ItemIcon = DescriptionPanel.Find("Icon").GetComponent<Image>();
+        ItemIcon = DescriptionPanel.Find("IconBorder/Icon").GetComponent<Image>();
         ItemsPanel = (RectTransform)transform.Find("ItemsPanelBorder/ItemsPanel");
         ItemTemplate = (RectTransform)ItemsPanel.Find("ItemTemplate");
 
         ItemTemplate.gameObject.SetActive(false);
+
+        GoldsRoot = (RectTransform)ItemsPanel.Find("Golds");
+        PlayerGold = GoldsRoot.Find("Frame/PlayerGold").GetComponent<TextMeshProUGUI>();
+        SellerGold = GoldsRoot.Find("Frame/SellerGold").GetComponent<TextMeshProUGUI>();
+        TotalGold = GoldsRoot.Find("Frame/TotalGold").GetComponent<TextMeshProUGUI>();
+
+        m_soundPlayer = GetComponent<AudioSource>();
     }
 
     public void ProcessShopUI(Shop shop)
@@ -45,6 +63,7 @@ public class ShopUI : MonoBehaviour
             AddItemToListing(shop.Stocks[i]);
 
         OnSelectedItemChanged(0, 0);
+        UpdateValues();
     }
 
     public void AddItemToListing(ShopStock stock)
@@ -99,6 +118,68 @@ public class ShopUI : MonoBehaviour
             OnSelectedItemChanged(m_currentSelectedItem, selectedItem);
             m_currentSelectedItem = selectedItem;
         }
+
+        //Add/remove item from cart
+        if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
+        {
+            bool success = m_currentShop.TryAddToCart(GetSelectedStock());
+
+            if (success)
+                m_soundPlayer.PlayOneShot(m_sfxShopCartAdd);
+            else
+                OnShopFailure();
+
+            UpdateValues();
+        }
+        else if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))
+        {
+            m_currentShop.RemoveFromCart(GetSelectedStock());
+            UpdateValues();
+        }
+
+        //Buying
+        if(Input.GetKeyDown(KeyCode.Return))
+        {
+            Dictionary<ShopStock, int> cart = m_currentShop.TryBuy();
+
+            if (cart == null)
+                OnShopFailure();
+            else
+                OnShopSuccess(cart);
+        }
+    }
+
+
+    public void OnShopSuccess(Dictionary<ShopStock, int> cart)
+    {
+        m_soundPlayer.PlayOneShot(m_sfxShopCartAdd);
+
+        foreach (var kv in cart)
+            CharacterPlayer.Instance.Inventory.AddItem(kv.Key.Item, kv.Value, true);
+
+        UpdateValues();
+    }
+    private void OnShopFailure()
+    {
+        m_soundPlayer.Stop();
+        m_soundPlayer.PlayOneShot(m_sfxShopFail);
+    }
+
+    public ShopStock GetSelectedStock()
+    {
+        return m_createdItems[m_currentSelectedItem].Stock;
+    }
+
+    private void UpdateValues()
+    {
+        PlayerGold.text = "YOUR GOLD: " + CharacterPlayer.Instance.Inventory.Gold;
+
+        if (m_currentShop.LinkedCharacter == null)
+            SellerGold.text = "SELLER GOLD: 0";
+        else
+            SellerGold.text = "SELLER GOLD: " + m_currentShop.LinkedCharacter.Inventory.Gold;
+
+        TotalGold.text = "TOTAL: " + m_currentShop.GetTotalCost();
     }
 
     private void OnSelectedItemChanged(int oldIdx, int newIdx)
