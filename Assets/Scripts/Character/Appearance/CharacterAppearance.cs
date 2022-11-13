@@ -87,7 +87,7 @@ public class CharacterAppearance : MonoBehaviour
         }
     }
 
-    private void UpdateAppearance()
+    public void UpdateAppearance()
     {
         //Iterate through every body part and update the characters current appearance
         foreach(var kv in m_bodypartInfo)

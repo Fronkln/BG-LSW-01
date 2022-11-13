@@ -13,8 +13,15 @@ public class PlayerInventoryUI : MonoBehaviour
     private Button m_genericButton;
     private Button m_outfitButton;
 
+    //Colors
+    private readonly Color32 m_unselectedColor = new Color32(255, 255, 255, 255);
+    private readonly Color32 m_selectedColor = new Color32(255, 255, 0, 255);
+
+    //Variables
     private List<Image> m_playerPreviewImages = new List<Image>();
     private List<InventoryUIEntry> m_inventoryUIEntries = new List<InventoryUIEntry>();
+
+    private int m_selectedItem = 0;
 
     private void Awake()
     {
@@ -32,10 +39,68 @@ public class PlayerInventoryUI : MonoBehaviour
         GenerateImages();
     }
 
+    public void OpenInventory()
+    {
+        UpdatePlayerPreview();
+        FilterInventory(ItemType.Generic);
+
+        gameObject.SetActive(true);
+    }
+
+    public void CloseInventory()
+    {
+        UpdatePlayerPreview();
+        FilterInventory(ItemType.Generic);
+
+        RootScript.PlayerBusy = false;
+        gameObject.SetActive(false);
+    }
+
+    private void OnSelectedItemChanged(int oldIdx, int newIdx)
+    {
+        InventoryUIEntry oldEntry = m_inventoryUIEntries[oldIdx];
+        InventoryUIEntry newEntry = m_inventoryUIEntries[newIdx];
+
+        oldEntry.Border.color = m_unselectedColor;
+        newEntry.Border.color = m_selectedColor;
+    }
+
     private void Update()
     {
         RootScript.PlayerBusy = true;
+
+        int selectedItem = m_selectedItem;
+
+        if (Input.GetKeyDown(KeyCode.D))
+            selectedItem += 1;
+        if (Input.GetKeyDown(KeyCode.A))
+            selectedItem -= 1;
+
+        if (selectedItem < 0)
+            selectedItem = m_inventoryUIEntries.Count - 1;
+        if (selectedItem >= m_inventoryUIEntries.Count)
+            selectedItem = 0;
+
+        if(selectedItem != m_selectedItem)
+        {
+            OnSelectedItemChanged(m_selectedItem, selectedItem);
+            m_selectedItem = selectedItem;
+        }
+
+        //Use item
+        if (Input.GetKeyDown(KeyCode.Return))
+        {
+            InventoryItem invItem = GetSelectedInventoryItem();
+            bool used = invItem.Item.OnUseItem(CharacterPlayer.Instance);
+
+            if (used)
+                if (invItem.Item.Type == ItemType.Outfit)
+                    UpdatePlayerPreview();
+        }
+        else if (Input.GetKeyDown(KeyCode.Escape))
+            CloseInventory();
     }
+
 
     private void GenerateImages()
     {
@@ -85,6 +150,11 @@ public class PlayerInventoryUI : MonoBehaviour
         }
     }
 
+    private InventoryItem GetSelectedInventoryItem()
+    {
+        return m_inventoryUIEntries[m_selectedItem].Item;
+    }
+
     public void UpdatePlayerPreview()
     {
         Sprite[] characterSprites = CharacterPlayer.Instance.Appearance.GetTextures(CharacterDirection.Down);
@@ -98,21 +168,5 @@ public class PlayerInventoryUI : MonoBehaviour
             else
                 m_playerPreviewImages[i].enabled = true;
         }
-    }
-
-    public void OpenInventory()
-    {
-        UpdatePlayerPreview();
-        FilterInventory(ItemType.Generic);
-
-        gameObject.SetActive(true);
-    }
-
-    public void CloseInventory()
-    {
-        UpdatePlayerPreview();
-        FilterInventory(ItemType.Generic);
-
-        gameObject.SetActive(false);
     }
 }
