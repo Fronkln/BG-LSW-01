@@ -7,12 +7,19 @@ using TMPro;
 
 public class SpeechUI : MonoBehaviour
 {
-    [HideInInspector] public TextMeshProUGUI Speaker;
-    [HideInInspector] public TextMeshProUGUI Speech;
+    //UI Objects
+    private TextMeshProUGUI m_speakerText;
+    private TextMeshProUGUI m_speechText;
+    private AudioSource m_soundEmitter;
 
+    //Sounds
+    [SerializeField] private AudioClip m_typeSound;
+
+    //Variables
     private bool m_active = false;
 
     private int m_curSpeechIndex = 0;
+    private float[] m_typeSpeed;
 
     private string[] m_speech = null;
     private string[] m_speaker = null;
@@ -21,24 +28,52 @@ public class SpeechUI : MonoBehaviour
 
     public void Awake()
     {
-        Speaker = transform.Find("SpeechInside/Speaker").GetComponent<TextMeshProUGUI>();
-        Speech = transform.Find("SpeechInside/Speech").GetComponent<TextMeshProUGUI>();
+        m_speakerText = transform.Find("SpeechInside/Speaker").GetComponent<TextMeshProUGUI>();
+        m_speechText = transform.Find("SpeechInside/Speech").GetComponent<TextMeshProUGUI>();
+        m_soundEmitter = transform.GetComponent<AudioSource>();
     }
 
-    public void Initialize(string[] speech, string[] speaker, Action finishCallback = null)
+    public void Initialize(string[] speech, string[] speaker, float[] typeDuration = null, Action finishCallback = null)
     {
+        if (typeDuration == null || typeDuration.Length == 0)
+        {
+            typeDuration = new float[speech.Length];
+            Array.Fill(typeDuration, 0);
+        }
+
         RootScript.PlayerBusy = true;
 
         m_speech = speech;
         m_speaker = speaker;
         m_curSpeechIndex = 0;
+        m_typeSpeed = typeDuration;
         m_active = true;
 
         m_speechFinishedCallback = finishCallback;
 
+        gameObject.SetActive(true);
         ShowDialogue(0);
 
-        gameObject.SetActive(true);
+    }
+
+    IEnumerator DoSpeechRoutine(int index, float speed)
+    {
+        int count = m_speech[index].Length;
+        float interval = speed / count;
+
+        for (int i = 0; i < count; i++)
+        {
+            yield return new WaitForSeconds(interval);
+
+            m_speechText.text += m_speech[index][i];
+            m_soundEmitter.clip = m_typeSound;
+
+            if (!m_soundEmitter.isPlaying)
+            {
+                m_soundEmitter.pitch = UnityEngine.Random.Range(0.85f, 1);
+                m_soundEmitter.Play();
+            }
+        }
     }
 
     public void Update()
@@ -46,7 +81,7 @@ public class SpeechUI : MonoBehaviour
         if (!m_active)
             return;
 
-        if(Input.GetKeyDown(KeyCode.E))
+        if (Input.GetKeyDown(KeyCode.E))
         {
             m_curSpeechIndex++;
 
@@ -68,7 +103,12 @@ public class SpeechUI : MonoBehaviour
 
     private void ShowDialogue(int index)
     {
-        Speech.text = m_speech[index];
-        Speaker.text = m_speaker[index];
+        m_speechText.text = "";
+        m_speakerText.text = m_speaker[index];
+
+        if (m_typeSpeed[index] <= 0)
+            m_speechText.text = m_speech[index];
+        else
+            StartCoroutine(DoSpeechRoutine(index, m_typeSpeed[index]));
     }
 }

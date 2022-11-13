@@ -34,6 +34,7 @@ public class ShopUI : MonoBehaviour
 
     private AudioSource m_soundPlayer = null;
 
+
     private void Awake()
     {
         DescriptionPanel = (RectTransform)transform.Find("DescriptionPanel");
@@ -52,20 +53,33 @@ public class ShopUI : MonoBehaviour
         m_soundPlayer = GetComponent<AudioSource>();
     }
 
-    public void ProcessShopUI(Shop shop)
+    public void ProcessShopUI(Shop shop, bool buying)
     {
         ClearShopUI();
         m_currentShop = shop;
 
         gameObject.SetActive(true);
 
-        for (int i = 0; i < shop.Stocks.Length; i++)
-            AddItemToListing(shop.Stocks[i]);
+        if (buying)
+        {
+            for (int i = 0; i < shop.Stocks.Length; i++)
+                AddItemToListing(shop.Stocks[i]);
+        }
+        else
+        {
+            //Generate fake shop stocks for selling
+            foreach(InventoryItem item in CharacterPlayer.Instance.Inventory.GetItemsOfType(m_currentShop.SellingType))
+                AddItemToListing(new ShopStock() { Item = item.Item, Stock = item.Count });
+        }
 
         OnSelectedItemChanged(0, 0);
         UpdateValues();
     }
 
+    /// <summary>
+    /// Buying variant
+    /// </summary>
+    /// <param name="stock"></param>
     public void AddItemToListing(ShopStock stock)
     {
         RectTransform newItemTemplate = Instantiate(ItemTemplate);
@@ -86,6 +100,35 @@ public class ShopUI : MonoBehaviour
 
         m_createdItems.Add(uiEntry);
     }
+
+    /*
+    /// <summary>
+    /// Selling variant
+    /// </summary>
+    /// <param name="stock"></param>
+    public void AddItemToListing(InventoryItem item)
+    {
+        RectTransform newItemTemplate = Instantiate(ItemTemplate);
+        newItemTemplate.transform.parent = ItemsPanel;
+
+        Image border = newItemTemplate.GetComponent<Image>();
+        Image itemIconImg = newItemTemplate.Find("ItemFg/ItemIcon").GetComponent<Image>();
+
+        ShopStock generatedStock =
+
+        ShopUIEntry uiEntry = new ShopUIEntry();
+        uiEntry.Root = newItemTemplate;
+        uiEntry.Border = border;
+        uiEntry.Icon = itemIconImg;
+        uiEntry.Stock = new ShopStock() { Item = item.Item, Stock = item.Count };
+
+        uiEntry.Border.color = m_unselectedColor;
+        uiEntry.Icon.sprite = stock.Item.Icon;
+        uiEntry.Root.gameObject.SetActive(true);
+
+        m_createdItems.Add(uiEntry);
+    }
+    */
 
     private void ClearShopUI()
     {
@@ -142,7 +185,7 @@ public class ShopUI : MonoBehaviour
         //Buying
         if(Input.GetKeyDown(KeyCode.Return))
         {
-            Dictionary<ShopStock, int> cart = m_currentShop.TryBuy();
+            Dictionary<ShopStock, int> cart = m_currentShop.TryCheckout();
 
             if (cart == null)
                 OnShopFailure();
@@ -156,8 +199,16 @@ public class ShopUI : MonoBehaviour
     {
         m_soundPlayer.PlayOneShot(m_sfxShopCartAdd);
 
-        foreach (var kv in cart)
-            CharacterPlayer.Instance.Inventory.AddItem(kv.Key.Item, kv.Value, true);
+        if (m_currentShop.IsBuying())
+        {
+            foreach (var kv in cart)
+                CharacterPlayer.Instance.Inventory.AddItem(kv.Key.Item, kv.Value, true);
+        }
+        else
+        {
+            foreach (var kv in cart)
+                CharacterPlayer.Instance.Inventory.RemoveItem(kv.Key.Item, kv.Value);
+        }
 
         UpdateValues();
 

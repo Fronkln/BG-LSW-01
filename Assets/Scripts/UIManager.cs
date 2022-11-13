@@ -44,36 +44,36 @@ public class UIManager : MonoBehaviour
        // m_speechChoiceUI.Initialize(new string[] { "Buy", "Sell" }, null);
     }
 
-    public static void InitializeShop(Shop shop)
+    public static void InitializeShop(Shop shop, bool buying)
     {
-        Instance.m_shopUI.ProcessShopUI(shop);
+        Instance.m_shopUI.ProcessShopUI(shop, buying);
     }
 
     /// <summary>
     /// Do speech, just one line.
     /// </summary>
-    public static void DoSpeech(string speech, string speaker, Action finishedCallback = null)
+    public static void DoSpeech(string speech, string speaker, float[] typeSpeed = null, Action finishedCallback = null)
     {
-        DoSpeech(new string[] { speech }, speaker, finishedCallback);
+        DoSpeech(new string[] { speech }, speaker, typeSpeed, finishedCallback);
     }
 
     /// <summary>
     /// Do speech, one speaker only.
     /// </summary>
-    public static void DoSpeech(string[] speech, string speaker, Action finishedCallback = null)
+    public static void DoSpeech(string[] speech, string speaker, float[] typeSpeed = null, Action finishedCallback = null)
     {
         string[] speakerArr = new string[speech.Length];
         Array.Fill(speakerArr, speaker);
 
-        DoSpeech(speech, speakerArr, finishedCallback);
+        DoSpeech(speech, speakerArr, typeSpeed, finishedCallback);
     }
 
     /// <summary>
     /// Do speech, with multiple speakers, speaker array must be same length as speech.
     /// </summary>
-    public static void DoSpeech(string[] speech, string[] speaker, Action finishedCallback = null)
+    public static void DoSpeech(string[] speech, string[] speaker, float[] typeSpeed = null, Action finishedCallback = null)
     {
-        Instance.m_speechUI.Initialize(speech, speaker, finishedCallback);
+        Instance.m_speechUI.Initialize(speech, speaker, typeSpeed, finishedCallback);
     }
 
     /// <summary>

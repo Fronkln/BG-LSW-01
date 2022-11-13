@@ -44,6 +44,9 @@ TagManager:
   - name: WorldBackground
     uniqueID: 179610981
     locked: 0
+  - name: WorldBackground2
+    uniqueID: 1109445959
+    locked: 0
   - name: Player
     uniqueID: 102510215
     locked: 0

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -25,8 +26,10 @@ public class ItemDefinition : ScriptableObject
     }
 }
 
+//Flag so that multiple item categories can be chosen on shops etc.
+[Flags]
 public enum ItemType
 {
-    Generic,
-    Outfit,
+    Generic = 1,
+    Outfit = 2
 }
