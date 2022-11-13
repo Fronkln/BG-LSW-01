@@ -160,6 +160,19 @@ public class CharacterAppearance : MonoBehaviour
         return m_bodypartAtlas[part].GetSprite(spriteName);
     }
 
+    /// <summary>
+    /// Gets all sprites used by this character, one use case: Inventory player visualization
+    /// </summary>
+    public Sprite[] GetTextures(CharacterDirection direction, int frame = 0)
+    {
+        List<Sprite> sprites = new List<Sprite>();
+
+        for(int i = 0; i < BodypartCount; i++)
+            sprites.Add(GetTextureForDirection((BodypartID)i, direction, frame));
+
+        return sprites.ToArray();
+    }
+
      /// <summary>
      /// Set the direction and the frame of the character.
      /// </summary>

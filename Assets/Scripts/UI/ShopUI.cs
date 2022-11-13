@@ -101,6 +101,8 @@ public class ShopUI : MonoBehaviour
         if (m_currentShop == null)
             return;
 
+        RootScript.PlayerBusy = true;
+
         int selectedItem = m_currentSelectedItem;
 
         if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.A))
@@ -158,11 +160,19 @@ public class ShopUI : MonoBehaviour
             CharacterPlayer.Instance.Inventory.AddItem(kv.Key.Item, kv.Value, true);
 
         UpdateValues();
+
+        Invoke("CloseShop", 1);
     }
     private void OnShopFailure()
     {
         m_soundPlayer.Stop();
         m_soundPlayer.PlayOneShot(m_sfxShopFail);
+    }
+
+    private void CloseShop()
+    {
+        gameObject.SetActive(false);
+        RootScript.PlayerBusy = false;
     }
 
     public ShopStock GetSelectedStock()

@@ -17,6 +17,7 @@ public class UIManager : MonoBehaviour
     private ShopUI m_shopUI = null;
     private SpeechUI m_speechUI = null;
     private SpeechChoiceUI m_speechChoiceUI = null;
+    private PlayerInventoryUI m_playerInventoryUI = null;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void Initialize()
@@ -33,10 +34,12 @@ public class UIManager : MonoBehaviour
         m_shopUI = m_uiRoot.Find("ShopUI").GetComponent<ShopUI>();
         m_speechUI = m_uiRoot.Find("SpeechUI").GetComponent<SpeechUI>();
         m_speechChoiceUI = m_uiRoot.Find("SpeechChoiceUI").GetComponent<SpeechChoiceUI>();
+        m_playerInventoryUI = m_uiRoot.Find("PlayerInventory").GetComponent<PlayerInventoryUI>();
 
         m_shopUI.gameObject.SetActive(false);
         m_speechUI.gameObject.SetActive(false);
         m_speechChoiceUI.gameObject.SetActive(false);
+        m_playerInventoryUI.gameObject.SetActive(false);
 
        // m_speechChoiceUI.Initialize(new string[] { "Buy", "Sell" }, null);
     }
@@ -79,5 +82,10 @@ public class UIManager : MonoBehaviour
     public static void DoSpeechChoice(string speech, string[] choices, Action<int> m_finishedCallback)
     {
         Instance.m_speechChoiceUI.Initialize(speech, choices, m_finishedCallback);
+    }
+
+    public static void ShowPlayerInventory()
+    {
+        Instance.m_playerInventoryUI.OpenInventory();
     }
 }

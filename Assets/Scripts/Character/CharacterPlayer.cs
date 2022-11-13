@@ -37,6 +37,11 @@ public class CharacterPlayer : BaseCharacter
 
         if (Input.GetKeyDown(KeyCode.E))
             Interact();
+
+        if(Input.GetKeyDown(KeyCode.I))
+        {
+            UIManager.ShowPlayerInventory();
+        }
     }
 
 
