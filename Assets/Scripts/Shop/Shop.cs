@@ -40,7 +40,7 @@ public class Shop : InteractableEntity
         //scope of this interview's goals. I would develop a more elegant, dynamic solution as needed in a real project.
 
         UIManager.DoSpeech(GreetSpeech.Speech, GreetSpeech.Speaker, GreetSpeech.Speed,
-            delegate 
+            delegate
             {
 
                 //We can both buy and sell from this salesman, present a dialogue choice
@@ -82,7 +82,7 @@ public class Shop : InteractableEntity
         UIManager.InitializeShop(this, buying);
     }
 
-    
+
     /// <summary>
     /// Returns the shopping cart on success, null on failure, used UNIVERSALLY on buying and selling
     /// </summary>
@@ -151,7 +151,7 @@ public class Shop : InteractableEntity
         if (shopStock.Stock == 0)
             return false;
 
-        if(shopStock.Stock > -1 && m_shoppingCart.ContainsKey(shopStock))
+        if (shopStock.Stock > -1 && m_shoppingCart.ContainsKey(shopStock))
         {
             if (m_shoppingCart[shopStock] + 1 > shopStock.Stock)
                 return false;
@@ -165,12 +165,17 @@ public class Shop : InteractableEntity
         return true;
     }
 
-    public void RemoveFromCart(ShopStock shopStock)
+    public bool RemoveFromCart(ShopStock shopStock)
     {
         if (!m_shoppingCart.ContainsKey(shopStock))
-            return;
+            return false;
 
         if (m_shoppingCart[shopStock]-- <= 0)
             m_shoppingCart.Remove(shopStock);
+
+        if (!m_shoppingCart.ContainsKey(shopStock))
+            return false;
+
+        return true;
     }
 }

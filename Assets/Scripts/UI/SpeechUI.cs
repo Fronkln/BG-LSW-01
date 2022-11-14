@@ -81,7 +81,7 @@ public class SpeechUI : MonoBehaviour
         if (!m_active)
             return;
 
-        if (Input.GetKeyDown(KeyCode.E))
+        if (Input.GetKeyDown(KeyCode.E) || Input.GetKeyDown(KeyCode.Return))
         {
             m_curSpeechIndex++;
 

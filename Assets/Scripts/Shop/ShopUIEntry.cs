@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,4 +12,6 @@ public class ShopUIEntry
     public Image Border;
     public Image Icon;
     public ShopStock Stock;
+    public RectTransform CountDisplayRoot;
+    public TextMeshProUGUI CountDisplay;
 }

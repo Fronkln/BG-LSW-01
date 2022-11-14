@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Diagnostics;
+using static UnityEngine.EventSystems.EventTrigger;
 
 public class ShopUI : MonoBehaviour
 {
@@ -87,16 +88,25 @@ public class ShopUI : MonoBehaviour
 
         Image border = newItemTemplate.GetComponent<Image>();
         Image itemIconImg = newItemTemplate.Find("ItemFg/ItemIcon").GetComponent<Image>();
+        RectTransform countDisplayRoot = (RectTransform)itemIconImg.transform.Find("CountRoot");
+        TextMeshProUGUI countDisplay = countDisplayRoot.Find("Count").GetComponent<TextMeshProUGUI>();
 
         ShopUIEntry uiEntry = new ShopUIEntry();
         uiEntry.Root = newItemTemplate;
         uiEntry.Border = border;
         uiEntry.Icon = itemIconImg;
         uiEntry.Stock = stock;
+        uiEntry.CountDisplayRoot = countDisplayRoot;
+        uiEntry.CountDisplay = countDisplay;
 
         uiEntry.Border.color = m_unselectedColor;
         uiEntry.Icon.sprite = stock.Item.Icon;
         uiEntry.Root.gameObject.SetActive(true);
+
+        uiEntry.CountDisplay.text = stock.Stock.ToString();
+        
+        if(stock.Stock <= 1)
+            uiEntry.CountDisplayRoot.gameObject.SetActive(false);
 
         m_createdItems.Add(uiEntry);
     }
@@ -167,10 +177,19 @@ public class ShopUI : MonoBehaviour
         //Add/remove item from cart
         if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
         {
-            bool success = m_currentShop.TryAddToCart(GetSelectedStock());
+            ShopStock stock = GetSelectedStock();
+
+            bool success = m_currentShop.TryAddToCart(stock);
 
             if (success)
+            {
                 m_soundPlayer.PlayOneShot(m_sfxShopCartAdd);
+
+                ShopUIEntry entry = m_createdItems[m_currentSelectedItem];
+
+                if (stock.Stock > -1)
+                    entry.CountDisplay.text = (int.Parse(entry.CountDisplay.text) - 1).ToString();
+            }
             else
                 OnShopFailure();
 
@@ -178,7 +197,15 @@ public class ShopUI : MonoBehaviour
         }
         else if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))
         {
-            m_currentShop.RemoveFromCart(GetSelectedStock());
+            ShopStock stock = GetSelectedStock();
+            ShopUIEntry entry = m_createdItems[m_currentSelectedItem];
+
+            if (m_currentShop.RemoveFromCart(stock))
+            {
+                if (stock.Stock > -1)
+                    entry.CountDisplay.text = (int.Parse(entry.CountDisplay.text) + 1).ToString();
+            }
+
             UpdateValues();
         }
 

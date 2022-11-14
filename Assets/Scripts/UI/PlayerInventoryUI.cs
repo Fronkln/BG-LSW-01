@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class PlayerInventoryUI : MonoBehaviour
 {
@@ -133,18 +134,29 @@ public class PlayerInventoryUI : MonoBehaviour
         {
             InventoryUIEntry entry = new InventoryUIEntry();
 
+            //Locate the UI components
             RectTransform root = Instantiate(m_itemTemplate);
             Image border = root.Find("Frame").GetComponent<Image>();
             Image icon = border.transform.Find("Icon").GetComponent<Image>();
+            RectTransform countDisplayRoot = (RectTransform)border.transform.Find("CountRoot");
+            TextMeshProUGUI countDisplay = countDisplayRoot.Find("Count").GetComponent<TextMeshProUGUI>();
 
             entry.Root = root;
             entry.Border = border;
             entry.Icon = icon;
             entry.Item = item;
+            entry.CountDisplay = countDisplay;
+            entry.CountDisplayRoot = countDisplayRoot;
 
             root.SetParent(m_itemsPanel, false);
             root.gameObject.SetActive(true);
             icon.sprite = item.Item.Icon;
+
+            countDisplay.text = item.Count.ToString();
+
+            if (item.Count <= 1)
+                countDisplayRoot.gameObject.SetActive(false);
+            
 
             m_inventoryUIEntries.Add(entry);
         }
