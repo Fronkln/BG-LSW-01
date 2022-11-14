@@ -54,6 +54,14 @@ public class CharacterAppearance : MonoBehaviour
         }
     }
 
+    public void Randomize()
+    {
+        for (int i = 0; i < BodypartCount; i++)
+            SetBodyPart((BodypartID)i, 0, UnityEngine.Random.Range(0, 4));
+
+        UpdateAppearance();
+    }
+
     private void ClearSprites()
     {
         //Clear previous sprite objects if we had any
@@ -82,6 +90,10 @@ public class CharacterAppearance : MonoBehaviour
 
             //Create the sprite component
             SpriteRenderer bodypartRenderer = spriteObject.AddComponent<SpriteRenderer>();
+
+            //Set up sort order
+            if (part == BodypartID.Hair || part == BodypartID.Arms)
+                bodypartRenderer.sortingOrder += 1;
 
             m_bodypartSprites[part] = bodypartRenderer;
         }

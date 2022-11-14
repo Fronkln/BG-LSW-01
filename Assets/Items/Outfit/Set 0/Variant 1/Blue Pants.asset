@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: Blue Pants
   m_EditorClassIdentifier: 
   Name: Blue Pants
-  Description: Whoa, it's an item!
+  Description: It looks good on you.
   BuyPrice: 10
   SellPrice: 10
-  Icon: {fileID: -460669580, guid: 26f3aee068c753b4883904088bd02b1e, type: 3}
+  Icon: {fileID: 21300000, guid: 81edbc01362a9e8409c09d00b9cf443e, type: 3}
   Bodypart: 0
   Set: 0
   Variant: 1

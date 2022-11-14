@@ -20,8 +20,14 @@ public class BaseCharacter : MonoBehaviour
 
     public CharacterDirection Direction = CharacterDirection.Down;
 
+    protected AudioSource m_soundEmitter;
+
+    private AudioClip m_sfxFootstepLeft;
+    private AudioClip m_sfxFootstepRight;
+
     public virtual void Awake()
     {
+        //Initialize the visualization of the player.
         Appearance = gameObject.AddComponent<CharacterAppearance>();
 
         //Physics component of the character.
@@ -44,10 +50,33 @@ public class BaseCharacter : MonoBehaviour
         //Enables animations to more easily interact with the character.
         gameObject.AddComponent<CharacterAnimEvents>();
 
+        //Sound emitter
+        m_soundEmitter = gameObject.AddComponent<AudioSource>();
+        m_soundEmitter.playOnAwake = false;
+        m_soundEmitter.spatialBlend = 1;
+        m_soundEmitter.rolloffMode = AudioRolloffMode.Linear;
+        m_soundEmitter.minDistance = 2;
+        m_soundEmitter.maxDistance = 24;
+
+        //Load important character sounds
+        LoadSounds();
+
         //We are not physically simulated by default (all constraints enabled), the player will change that.
         DisablePhysics();
+
+        if (!IsPlayer())
+            Appearance.Randomize();
     }
 
+
+    private void LoadSounds()
+    {
+        //Loaded by resources automatically to maintain the consistent dynamicness of the code.
+        m_sfxFootstepLeft = Resources.Load<AudioClip>("footstep_left");
+        m_sfxFootstepRight = Resources.Load<AudioClip>("footstep_right");
+    }
+
+    //Left for inheritance
     public virtual void Start()
     {
 
@@ -71,6 +100,20 @@ public class BaseCharacter : MonoBehaviour
     {
         Animator.SetBool("moving", IsMoving());
         Appearance.SetFlipped(Direction == CharacterDirection.Left); //flip anim if we are left
+    }
+
+    /// <summary>
+    /// Used for animation events
+    /// </summary>
+    /// <param name="foot"></param>
+    public void OnFootstep(int foot)
+    {
+        bool rightFoot = foot == 1;
+
+        if (rightFoot)
+            m_soundEmitter.PlayOneShot(m_sfxFootstepRight);
+        else
+            m_soundEmitter.PlayOneShot(m_sfxFootstepLeft);
     }
 
     //The direction the character is facing.

@@ -12,4 +12,9 @@ public static class RootScript
     /// <br>or moving</br>
     /// </summary>
     public static bool PlayerBusy = false;
+
+    public static bool ConfirmKeyIsPressed()
+    {
+        return Input.GetKeyDown(KeyCode.E) || Input.GetKeyDown(KeyCode.Return);
+    }
 }

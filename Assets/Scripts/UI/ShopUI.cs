@@ -9,21 +9,25 @@ using static UnityEngine.EventSystems.EventTrigger;
 public class ShopUI : MonoBehaviour
 {
     //UI Objects
-    [HideInInspector] public RectTransform DescriptionPanel;
-    [HideInInspector] public TextMeshProUGUI DescriptionText;
-    [HideInInspector] public Image ItemIcon;
+    private RectTransform m_descriptionPanel;
+    private TextMeshProUGUI m_descriptionText;
+    private TextMeshProUGUI m_descriptionName;
+    private Image m_itemIcon;
 
-    [HideInInspector] public RectTransform ItemsPanel;
-    [HideInInspector] public RectTransform ItemTemplate;
+    private RectTransform ItemsPanel;
+    private RectTransform ItemTemplate;
 
-    [HideInInspector] public RectTransform GoldsRoot;
-    [HideInInspector] public TextMeshProUGUI PlayerGold;
-    [HideInInspector] public TextMeshProUGUI SellerGold;
-    [HideInInspector] public TextMeshProUGUI TotalGold;
+    private RectTransform m_goldsRoot;
+    private TextMeshProUGUI m_playerGold;
+    private TextMeshProUGUI m_sellerGold;
+    private TextMeshProUGUI m_totalGold;
 
     //Sounds
+    [SerializeField] private AudioClip m_sfxSelectionChange;
     [SerializeField] private AudioClip m_sfxShopCartAdd;
+    [SerializeField] private AudioClip m_sfxShopCartRemove;
     [SerializeField] private AudioClip m_sfxShopFail;
+    [SerializeField] private AudioClip m_sfxShopCheckout;
 
     //Colors
     private static readonly Color32 m_unselectedColor = new Color32(94, 94, 91, 255);
@@ -38,18 +42,19 @@ public class ShopUI : MonoBehaviour
 
     private void Awake()
     {
-        DescriptionPanel = (RectTransform)transform.Find("DescriptionPanel");
-        DescriptionText = DescriptionPanel.Find("DescriptionText").GetComponent<TextMeshProUGUI>();
-        ItemIcon = DescriptionPanel.Find("IconBorder/Icon").GetComponent<Image>();
+        m_descriptionPanel = (RectTransform)transform.Find("DescriptionPanel");
+        m_descriptionText = m_descriptionPanel.Find("DescriptionText").GetComponent<TextMeshProUGUI>();
+        m_descriptionName = m_descriptionPanel.Find("DescriptionName").GetComponent<TextMeshProUGUI>();
+        m_itemIcon = m_descriptionPanel.Find("IconBorder/Icon").GetComponent<Image>();
         ItemsPanel = (RectTransform)transform.Find("ItemsPanelBorder/ItemsPanel");
         ItemTemplate = (RectTransform)ItemsPanel.Find("ItemTemplate");
 
         ItemTemplate.gameObject.SetActive(false);
 
-        GoldsRoot = (RectTransform)ItemsPanel.Find("Golds");
-        PlayerGold = GoldsRoot.Find("Frame/PlayerGold").GetComponent<TextMeshProUGUI>();
-        SellerGold = GoldsRoot.Find("Frame/SellerGold").GetComponent<TextMeshProUGUI>();
-        TotalGold = GoldsRoot.Find("Frame/TotalGold").GetComponent<TextMeshProUGUI>();
+        m_goldsRoot = (RectTransform)ItemsPanel.Find("Golds");
+        m_playerGold = m_goldsRoot.Find("Frame/PlayerGold").GetComponent<TextMeshProUGUI>();
+        m_sellerGold = m_goldsRoot.Find("Frame/SellerGold").GetComponent<TextMeshProUGUI>();
+        m_totalGold = m_goldsRoot.Find("Frame/TotalGold").GetComponent<TextMeshProUGUI>();
 
         m_soundPlayer = GetComponent<AudioSource>();
     }
@@ -69,7 +74,7 @@ public class ShopUI : MonoBehaviour
         else
         {
             //Generate fake shop stocks for selling
-            foreach(InventoryItem item in CharacterPlayer.Instance.Inventory.GetItemsOfType(m_currentShop.SellingType))
+            foreach (InventoryItem item in CharacterPlayer.Instance.Inventory.GetItemsOfType(m_currentShop.SellingType))
                 AddItemToListing(new ShopStock() { Item = item.Item, Stock = item.Count });
         }
 
@@ -84,7 +89,7 @@ public class ShopUI : MonoBehaviour
     public void AddItemToListing(ShopStock stock)
     {
         RectTransform newItemTemplate = Instantiate(ItemTemplate);
-        newItemTemplate.transform.parent = ItemsPanel;
+        newItemTemplate.transform.SetParent(ItemsPanel, false);
 
         Image border = newItemTemplate.GetComponent<Image>();
         Image itemIconImg = newItemTemplate.Find("ItemFg/ItemIcon").GetComponent<Image>();
@@ -104,41 +109,12 @@ public class ShopUI : MonoBehaviour
         uiEntry.Root.gameObject.SetActive(true);
 
         uiEntry.CountDisplay.text = stock.Stock.ToString();
-        
-        if(stock.Stock <= 1)
+
+        if (stock.Stock <= 1)
             uiEntry.CountDisplayRoot.gameObject.SetActive(false);
 
         m_createdItems.Add(uiEntry);
     }
-
-    /*
-    /// <summary>
-    /// Selling variant
-    /// </summary>
-    /// <param name="stock"></param>
-    public void AddItemToListing(InventoryItem item)
-    {
-        RectTransform newItemTemplate = Instantiate(ItemTemplate);
-        newItemTemplate.transform.parent = ItemsPanel;
-
-        Image border = newItemTemplate.GetComponent<Image>();
-        Image itemIconImg = newItemTemplate.Find("ItemFg/ItemIcon").GetComponent<Image>();
-
-        ShopStock generatedStock =
-
-        ShopUIEntry uiEntry = new ShopUIEntry();
-        uiEntry.Root = newItemTemplate;
-        uiEntry.Border = border;
-        uiEntry.Icon = itemIconImg;
-        uiEntry.Stock = new ShopStock() { Item = item.Item, Stock = item.Count };
-
-        uiEntry.Border.color = m_unselectedColor;
-        uiEntry.Icon.sprite = stock.Item.Icon;
-        uiEntry.Root.gameObject.SetActive(true);
-
-        m_createdItems.Add(uiEntry);
-    }
-    */
 
     private void ClearShopUI()
     {
@@ -202,6 +178,8 @@ public class ShopUI : MonoBehaviour
 
             if (m_currentShop.RemoveFromCart(stock))
             {
+                m_soundPlayer.PlayOneShot(m_sfxShopCartRemove);
+
                 if (stock.Stock > -1)
                     entry.CountDisplay.text = (int.Parse(entry.CountDisplay.text) + 1).ToString();
             }
@@ -210,7 +188,7 @@ public class ShopUI : MonoBehaviour
         }
 
         //Buying
-        if(Input.GetKeyDown(KeyCode.Return))
+        if (Input.GetKeyDown(KeyCode.Return))
         {
             Dictionary<ShopStock, int> cart = m_currentShop.TryCheckout();
 
@@ -224,7 +202,7 @@ public class ShopUI : MonoBehaviour
 
     public void OnShopSuccess(Dictionary<ShopStock, int> cart)
     {
-        m_soundPlayer.PlayOneShot(m_sfxShopCartAdd);
+        m_soundPlayer.PlayOneShot(m_sfxShopCheckout);
 
         if (m_currentShop.IsBuying())
         {
@@ -260,25 +238,29 @@ public class ShopUI : MonoBehaviour
 
     private void UpdateValues()
     {
-        PlayerGold.text = "YOUR GOLD: " + CharacterPlayer.Instance.Inventory.Gold;
+        m_playerGold.text = "YOUR GOLD: " + CharacterPlayer.Instance.Inventory.Gold;
 
         if (m_currentShop.LinkedCharacter == null)
-            SellerGold.text = "SELLER GOLD: 0";
+            m_sellerGold.text = "SELLER GOLD: 0";
         else
-            SellerGold.text = "SELLER GOLD: " + m_currentShop.LinkedCharacter.Inventory.Gold;
+            m_sellerGold.text = "SELLER GOLD: " + m_currentShop.LinkedCharacter.Inventory.Gold;
 
-        TotalGold.text = "TOTAL: " + m_currentShop.GetTotalCost();
+        m_totalGold.text = "TOTAL: " + m_currentShop.GetTotalCost();
     }
 
     private void OnSelectedItemChanged(int oldIdx, int newIdx)
     {
+        if (oldIdx != newIdx)
+            m_soundPlayer.PlayOneShot(m_sfxSelectionChange);
+
         ShopUIEntry m_oldSelected = m_createdItems[oldIdx];
         ShopUIEntry m_newSelected = m_createdItems[newIdx];
 
         m_oldSelected.Border.color = m_unselectedColor;
         m_newSelected.Border.color = m_highlightedColor;
 
-        DescriptionText.text = m_newSelected.Stock.Item.Description;
-        ItemIcon.sprite = m_newSelected.Stock.Item.Icon;
+        m_descriptionText.text = m_newSelected.Stock.Item.Description;
+        m_descriptionName.text = m_newSelected.Stock.Item.Name;
+        m_itemIcon.sprite = m_newSelected.Stock.Item.Icon;
     }
 }

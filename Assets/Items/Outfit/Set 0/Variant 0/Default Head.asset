@@ -17,6 +17,6 @@ MonoBehaviour:
   BuyPrice: 10
   SellPrice: 10
   Icon: {fileID: -659054808, guid: 0047bfa69f4d3ee4d8fe1693f39ce9aa, type: 3}
-  Bodypart: 3
+  Bodypart: 4
   Set: 0
   Variant: 0

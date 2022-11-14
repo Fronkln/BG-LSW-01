@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Reflection;
 
 public class SpeechUI : MonoBehaviour
 {
@@ -25,6 +26,15 @@ public class SpeechUI : MonoBehaviour
     private string[] m_speaker = null;
 
     private Action m_speechFinishedCallback = null;
+
+    private Coroutine m_speechCoroutine;
+
+    //The speech function used to be a coroutine, but it proved to be difficult to manipulate
+    //So i moved it to Update instead
+    private int m_targetCount;
+    private int m_curLetter;
+    private float m_interval;
+    private float m_curInterval;
 
     public void Awake()
     {
@@ -56,39 +66,60 @@ public class SpeechUI : MonoBehaviour
 
     }
 
-    IEnumerator DoSpeechRoutine(int index, float speed)
-    {
-        int count = m_speech[index].Length;
-        float interval = speed / count;
-
-        for (int i = 0; i < count; i++)
-        {
-            yield return new WaitForSeconds(interval);
-
-            m_speechText.text += m_speech[index][i];
-            m_soundEmitter.clip = m_typeSound;
-
-            if (!m_soundEmitter.isPlaying)
-            {
-                m_soundEmitter.pitch = UnityEngine.Random.Range(0.85f, 1);
-                m_soundEmitter.Play();
-            }
-        }
-    }
-
-    public void Update()
+    private void Update()
     {
         if (!m_active)
             return;
 
-        if (Input.GetKeyDown(KeyCode.E) || Input.GetKeyDown(KeyCode.Return))
-        {
-            m_curSpeechIndex++;
+        if (m_typeSpeed[m_curSpeechIndex] > 0)
+            m_curInterval += Time.deltaTime;
 
-            if (m_curSpeechIndex >= m_speech.Length)
-                OnDialogueFinished();
+        if (RootScript.ConfirmKeyIsPressed())
+        {
+            if (m_curLetter != m_targetCount)
+            {
+                m_curLetter = m_targetCount;
+                m_speechText.text = m_speech[m_curSpeechIndex];
+            }
             else
-                ShowDialogue(m_curSpeechIndex);
+            {
+                m_curSpeechIndex++;
+
+                if (m_curSpeechIndex >= m_speech.Length)
+                    OnDialogueFinished();
+                else
+                    ShowDialogue(m_curSpeechIndex);
+            }
+        }
+    }
+
+    public void FixedUpdate()
+    {
+        if (!m_active)
+            return;
+
+        if (m_typeSpeed[m_curSpeechIndex] > 0)
+            UpdateTyping();
+    }
+
+    private void UpdateTyping()
+    {
+        if (m_curLetter < m_targetCount)
+        {
+            if (m_curInterval >= m_interval)
+            {
+                m_speechText.text += m_speech[m_curSpeechIndex][m_curLetter];
+                m_soundEmitter.clip = m_typeSound;
+
+                if (!m_soundEmitter.isPlaying)
+                {
+                    m_soundEmitter.pitch = UnityEngine.Random.Range(0.85f, 1);
+                    m_soundEmitter.Play();
+                }
+
+                m_curInterval = 0;
+                m_curLetter++;
+            }
         }
     }
 
@@ -109,6 +140,11 @@ public class SpeechUI : MonoBehaviour
         if (m_typeSpeed[index] <= 0)
             m_speechText.text = m_speech[index];
         else
-            StartCoroutine(DoSpeechRoutine(index, m_typeSpeed[index]));
+        {
+            m_curInterval = 0;
+            m_curLetter = 0;
+            m_targetCount = m_speech[index].Length;
+            m_interval = m_typeSpeed[index] / m_targetCount;
+        }
     }
 }

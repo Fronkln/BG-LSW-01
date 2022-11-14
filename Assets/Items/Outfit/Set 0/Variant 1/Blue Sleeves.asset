@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: Blue Sleeves
   m_EditorClassIdentifier: 
   Name: Blue Sleeves
-  Description: Whoa, it's an item!
+  Description: It looks good on you.
   BuyPrice: 10
   SellPrice: 10
-  Icon: {fileID: -859657675, guid: cf7f093d0731ada4394ccd60b3c4ed89, type: 3}
+  Icon: {fileID: 21300000, guid: ec694a0238da95e45b1fa2c1486b1681, type: 3}
   Bodypart: 1
   Set: 0
   Variant: 1

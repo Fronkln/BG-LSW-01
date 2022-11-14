@@ -18,6 +18,7 @@ public class UIManager : MonoBehaviour
     private SpeechUI m_speechUI = null;
     private SpeechChoiceUI m_speechChoiceUI = null;
     private PlayerInventoryUI m_playerInventoryUI = null;
+    private RectTransform m_energyRoot = null;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void Initialize()
@@ -35,6 +36,7 @@ public class UIManager : MonoBehaviour
         m_speechUI = m_uiRoot.Find("SpeechUI").GetComponent<SpeechUI>();
         m_speechChoiceUI = m_uiRoot.Find("SpeechChoiceUI").GetComponent<SpeechChoiceUI>();
         m_playerInventoryUI = m_uiRoot.Find("PlayerInventory").GetComponent<PlayerInventoryUI>();
+        m_energyRoot = (RectTransform)m_uiRoot.Find("EnergyRoot");
 
         m_shopUI.gameObject.SetActive(false);
         m_speechUI.gameObject.SetActive(false);
@@ -42,6 +44,15 @@ public class UIManager : MonoBehaviour
         m_playerInventoryUI.gameObject.SetActive(false);
 
        // m_speechChoiceUI.Initialize(new string[] { "Buy", "Sell" }, null);
+    }
+
+    private void Update()
+    {
+        //Menus that obstruct energy bar cause it to be hidden
+        if (IsSpeechActive() || m_playerInventoryUI.gameObject.activeSelf || m_shopUI.gameObject.activeSelf)
+            m_energyRoot.gameObject.SetActive(false);
+        else
+            m_energyRoot.gameObject.SetActive(true);
     }
 
     public static void InitializeShop(Shop shop, bool buying)
@@ -66,6 +77,12 @@ public class UIManager : MonoBehaviour
         Array.Fill(speakerArr, speaker);
 
         DoSpeech(speech, speakerArr, typeSpeed, finishedCallback);
+    }
+
+
+    public static bool IsSpeechActive()
+    {
+        return Instance.m_speechChoiceUI.gameObject.activeInHierarchy || Instance.m_speechUI.gameObject.activeInHierarchy;
     }
 
     /// <summary>

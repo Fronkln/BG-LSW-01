@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 842abf7576675564899a962ef4f52189, type: 3}
-  m_Name: Default Head
+  m_Name: Yellow Hair
   m_EditorClassIdentifier: 
-  Name: Default Head
-  Description: 
+  Name: Yellow Hair
+  Description: It looks good on you.
   BuyPrice: 10
   SellPrice: 10
-  Icon: {fileID: -659054808, guid: 0047bfa69f4d3ee4d8fe1693f39ce9aa, type: 3}
-  Bodypart: 3
+  Icon: {fileID: 21300000, guid: 3f47a80bcd7a6c44da65aff8844f7844, type: 3}
+  Bodypart: 4
   Set: 0
-  Variant: 0
+  Variant: 1

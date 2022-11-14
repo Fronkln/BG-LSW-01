@@ -12,10 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31d7963f508214b429f126ac4b099793, type: 3}
   m_Name: TestItem
   m_EditorClassIdentifier: 
-  Name: Jhrino's Lucky Charm
+  Name: Mehmet's Lucky Programming Keyboard
   Description: It is said that owning this item increases your chances of succeeding
-    on programming tasks.
-  BuyPrice: 10
+    on programming interviews.
+  BuyPrice: 350
   SellPrice: 10
-  Type: 0
-  Icon: {fileID: 21300000, guid: dcea51d6065d64246aeec467afeff684, type: 3}
+  Icon: {fileID: 21300000, guid: 52fdf7aaa310b304bba53033ad80d841, type: 3}

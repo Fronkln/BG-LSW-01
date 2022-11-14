@@ -53,3 +53,6 @@ TagManager:
   - name: WorldForeground
     uniqueID: 1524279145
     locked: 0
+  - name: Misc
+    uniqueID: 2873607171
+    locked: 0

@@ -69,10 +69,8 @@ public class SpeechChoiceUI : MonoBehaviour
             OnOptionChanged();
         }
 
-        if (Input.GetKeyDown(KeyCode.Return))
-        {
+        if (RootScript.ConfirmKeyIsPressed())
             OnOptionChosen();
-        }
     }
 
     //Clear generated UI
@@ -103,7 +101,8 @@ public class SpeechChoiceUI : MonoBehaviour
         for (int i = 0; i < options.Length; i++)
         {
             TextMeshProUGUI newChoice = Instantiate(m_optionTemplate);
-            newChoice.transform.parent = m_choiceGrid;
+            newChoice.transform.SetParent(m_choiceGrid, false);
+            //newChoice.transform.parent = m_choiceGrid;
             newChoice.text = options[i];
             newChoice.gameObject.SetActive(true);
 

@@ -79,6 +79,7 @@ public class Shop : InteractableEntity
     public void OpenShop(bool buying)
     {
         RootScript.PlayerBusy = true;
+        m_buying = buying;
         UIManager.InitializeShop(this, buying);
     }
 

@@ -13,10 +13,15 @@ public class PlayerInventoryUI : MonoBehaviour
     private RectTransform m_itemTemplate;
     private Button m_genericButton;
     private Button m_outfitButton;
+    private AudioSource m_soundEmitter;
+
+    //Sounds
+    [SerializeField] private AudioClip m_sfxSelectionChanged;
+    [SerializeField] private AudioClip m_sfxWearOutfit;
 
     //Colors
     private readonly Color32 m_unselectedColor = new Color32(255, 255, 255, 255);
-    private readonly Color32 m_selectedColor = new Color32(255, 255, 0, 255);
+    private readonly Color32 m_selectedColor = new Color32(61, 255, 0, 255);
 
     //Variables
     private List<Image> m_playerPreviewImages = new List<Image>();
@@ -31,7 +36,9 @@ public class PlayerInventoryUI : MonoBehaviour
         m_itemTemplate = (RectTransform)m_itemsPanel.Find("ItemTemplate");
         m_genericButton = transform.Find("GenericButton").GetComponent<Button>();
         m_outfitButton = transform.Find("OutfitButton").GetComponent<Button>();
+        m_soundEmitter = transform.GetComponent<AudioSource>();
 
+        //Button events
         m_genericButton.onClick.AddListener(delegate { FilterInventory(ItemType.Generic); });
         m_outfitButton.onClick.AddListener(delegate { FilterInventory(ItemType.Outfit); });
 
@@ -64,6 +71,8 @@ public class PlayerInventoryUI : MonoBehaviour
 
         oldEntry.Border.color = m_unselectedColor;
         newEntry.Border.color = m_selectedColor;
+
+        m_soundEmitter.PlayOneShot(m_sfxSelectionChanged);
     }
 
     private void Update()
@@ -96,9 +105,12 @@ public class PlayerInventoryUI : MonoBehaviour
 
             if (used)
                 if (invItem.Item.Type == ItemType.Outfit)
+                {
                     UpdatePlayerPreview();
+                    m_soundEmitter.PlayOneShot(m_sfxWearOutfit);
+                }
         }
-        else if (Input.GetKeyDown(KeyCode.Escape))
+        else if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.I))
             CloseInventory();
     }
 
@@ -160,6 +172,9 @@ public class PlayerInventoryUI : MonoBehaviour
 
             m_inventoryUIEntries.Add(entry);
         }
+
+        m_selectedItem = 0;
+        OnSelectedItemChanged(0, 0);
     }
 
     private InventoryItem GetSelectedInventoryItem()
