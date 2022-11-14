@@ -67,7 +67,7 @@ public class Inventory
 
     public InventoryItem[] GetItemsOfType(ItemType itemType)
     {
-        return Items.Where(x => x.Item.Type.HasFlag(itemType)).ToArray();
+        return Items.Where(x => itemType.HasFlag(x.Item.Type)).ToArray();
     }
     public bool HasItem(ItemDefinition item)
     {

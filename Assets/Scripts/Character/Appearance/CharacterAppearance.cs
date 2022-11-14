@@ -84,8 +84,7 @@ public class CharacterAppearance : MonoBehaviour
 
             //Create the object
             GameObject spriteObject = new GameObject(part.ToString());
-            spriteObject.transform.parent = transform;
-            spriteObject.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+            spriteObject.transform.SetParent(transform, false);
             spriteObject.transform.localScale = new Vector3(BODYPART_SIZE, BODYPART_SIZE, BODYPART_SIZE);
 
             //Create the sprite component
